@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <h2>Dashboard</h2>
+        <button id="reset">Reset</button>
+        <h3 id="gtotal">Total:₹0</h3>
+        <div class="inputrow">
+            <input class="inputfield" type="text" placeholder="Item name" id="item">
+            <input class=" inputfield" type="number" placeholder="Amount" id="amount">
+            <button id="submit">Add</button>
+        </div>
+        <div id="expenses">
+            <p id="exp">Expenses:-</p>
+        </div>
+    </div>
+    
+    <script>
+        let total=0;
+
+        let exp=JSON.parse(localStorage.getItem("exp"))||[];
+        exp.forEach(function(e){
+            addCard(e.name,e.amount);
+            total+=e.amount;
+            setTotal();
+        });
+        const submit=document.getElementById("submit");
+        submit.addEventListener("click",function(){
+            const item=document.getElementById("item");
+            const amount=document.getElementById("amount");
+            const i=item.value==="";
+            const a=amount.value==='';
+            const az=amount.value==='0';
+
+            if (i || a||  az ){
+                alert("please enter valid value");
+                return;
+            }
+            
+            if (i){
+                item.classList.add("error");
+            }
+            if (a||az){
+                amount.classList.add("error");
+            }
+            else{
+                
+                itemName=item.value;
+                amtValue=amount.valueAsNumber;
+                addCard(itemName,amtValue);
+                
+
+        total+=amtValue;
+        exp.push({name:itemName,amount:amtValue});
+        saveToStorage();
+        setTotal();}
+        item.value="";
+        amount.value="";
+        });
+
+        function setTotal(){
+            const gtotal=document.getElementById("gtotal");
+            gtotal.textContent="";
+            gtotal.textContent=`Total:₹ ${total}`;
+        }
+
+        function addCard(itemName,amtValue){
+            const expenses=document.getElementById("expenses");
+            const card=document.createElement("div");
+            card.classList.add("card");
+            const textdiv=document.createElement("div");
+            textdiv.classList.add("textdiv");
+            const itm=document.createElement("span");
+            itm.textContent=`Item: ${itemName}`;
+            const amt=document.createElement("span");
+            amt.textContent=`amount:₹ ${amtValue}`;
+            textdiv.append(itm,amt);
+
+            const delBtn=document.createElement("button");
+            delBtn.textContent="✕ Delete";
+            delBtn.classList.add("delBtn");
+            delBtn.addEventListener("click",function(){
+                setTimeout(() => {
+                    card.remove();
+                    total-=amtValue;
+                    exp=exp.filter(e=>e.name!==itemName);
+                    saveToStorage();
+                    setTotal(total);
+
+                }, 300);
+            });
+
+            card.append(textdiv,delBtn);
+            expenses.append(card);
+
+            
+        }
+        
+        document.querySelectorAll("input").forEach(function(input){
+            input.addEventListener("input",function(){
+                let item=document.getElementById("item");
+                let amount=document.getElementById("amount");
+                item.classList.remove("error");
+                amount.classList.remove("error");
+
+            });
+        });
+
+        function saveToStorage(){
+            localStorage.setItem("exp",JSON.stringify(exp));
+        }
+
+        document.getElementById("reset").addEventListener("click",function(){
+            if (exp.length===0)return;
+            document.querySelectorAll(".card").forEach(card=>card.remove())
+            localStorage.removeItem("exp");
+            exp=[];
+            total=0;
+            setTotal();
+        });
+
+    </script>
+
+</body>
+</html>
